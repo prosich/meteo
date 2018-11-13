@@ -1,5 +1,6 @@
+#include <Espini.h>
 #include <DHT.h>
-#include <ESP8266HTTPClient.h>
+#include "wifis.h"
 
 // Conectar D0-RST (deepsleep)
 
@@ -8,26 +9,25 @@ int DHTPIN=D1;
 int DHTTYPE=DHT22;
 
 // Id para OTA
-String app="meteo";
-String ver="23";
+char app[]="meteo";
+char ver[]="24";
 
 // Autenticacion Corlysis
 String dbName="meteo1";
 String dbPass="013f827eb2c597cccb3fdbea31c46659";
 
-extern String ser; // serial  (en wifota.ino)
+String ser;
 
 void setup() { 
-  Serial.begin(74880);
-  if (wifota("app="+app+"&ver="+ver)) {
-    DHT dht(DHTPIN,DHTTYPE);
-    dht.begin();
-    float temp=dht.readTemperature();
-    float hum=dht.readHumidity();
-    if ((temp!=NAN)&&(hum!=NAN))
-      subeDatos((String)temp,(String)hum,
-                (String)dht.computeHeatIndex(temp,hum,false));
-  }
+  Espini cosa(wifis(),app,ver,"ota.rosich.es","syslog.rosich.es");
+  ser=cosa.getchipid();
+  DHT dht(DHTPIN,DHTTYPE);
+  dht.begin();
+  float temp=dht.readTemperature();
+  float hum=dht.readHumidity();
+  if ((temp!=NAN)&&(hum!=NAN))
+    subeDatos((String)temp,(String)hum,
+              (String)dht.computeHeatIndex(temp,hum,false));
   ESP.deepSleep(300e6);
 }
 
